@@ -1,0 +1,23 @@
+{
+  "name": "zet-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A lightweight, zero-dependency CLI framework for Node.js",
+  "bin": {
+    "zet": "./bin/zet.mjs"
+  },
+  "exports": {
+    ".": "./lib/index.mjs"
+  },
+  "main": "./lib/index.mjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin",
+    "lib"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}
