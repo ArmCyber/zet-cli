@@ -12,9 +12,20 @@ npm install -g zet-cli
 
 Requires Node.js >= 18.
 
+## Getting Started
+
+```sh
+mkdir my-project && cd my-project
+zet init
+zet hello
+# Hello from ZET!
+```
+
+`zet init` creates a `zet.config.mjs` with a sample command. Edit it to add your own.
+
 ## Quick Start
 
-Create a `zet.config.mjs` in your project root:
+Create a `zet.config.mjs` in your project root (or use `zet init`):
 
 ```js
 import zet from 'zet-cli';
@@ -287,6 +298,17 @@ zet.line('Plain text');  // no color, stdout
 
 Respects `NO_COLOR` env var and TTY detection.
 
+### `zet.setAiRulesPath()` / `zet.setIdeSpecsPath()`
+
+Configure output paths for `zet cli ai-rules` and `zet cli ide-specs`:
+
+```js
+zet.setAiRulesPath('docs/');      // zet-cli.md → docs/zet-cli.md
+zet.setIdeSpecsPath('.types/');  // .d.ts → .types/.zet-cli/index.d.ts
+```
+
+Both paths are relative to the project root. Call these in your `zet.config.mjs` before `export default zet`.
+
 ### Auto-generated Help
 
 ```sh
@@ -328,6 +350,34 @@ zet.register('deploy {env} {--Force}')
 
 export default zet;
 ```
+
+## Built-in Commands
+
+### `zet init`
+
+Bootstrap a new project — creates `zet.config.mjs` in the current directory with a sample command. Only checks the current directory (no parent traversal).
+
+### `zet cli ai-rules`
+
+Generate a `zet-cli.md` file — a condensed AI agent reference for your project's zet commands. By default, writes to the project root.
+
+```js
+zet.setAiRulesPath('docs/');  // zet-cli.md goes to docs/zet-cli.md
+```
+
+### `zet cli ide-specs`
+
+Generate TypeScript declarations (`.d.ts`) for IDE autocompletion. By default, writes to `.zet-cli/` in the project root (with a `.gitignore` so generated files stay out of version control).
+
+```js
+zet.setIdeSpecsPath('.types/');  // .d.ts goes to .types/.zet-cli/index.d.ts
+```
+
+### `zet cli --help`
+
+Show available cli subcommands.
+
+> Note: `zet --help` does not show `cli` or `init` — these are internal tooling commands.
 
 ## How It Works
 

@@ -10,8 +10,10 @@ import {
   TemplateResult,
   formatGlobalHelp,
   formatCommandHelp,
+  flattenParts,
   rootGroup,
   groups,
+  cliConfig,
 } from "../lib/index.mjs";
 import zet from "../lib/index.mjs";
 
@@ -412,5 +414,43 @@ describe("zet.rest()", () => {
   it("returns a RestPlaceholder instance", () => {
     const placeholder = zet.rest();
     assert.equal(placeholder.constructor.name, "RestPlaceholder");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CLI config setters
+// ---------------------------------------------------------------------------
+
+describe("cliConfig setters", () => {
+  it("setAiRulesPath stores the path", () => {
+    zet.setAiRulesPath("docs/");
+    assert.equal(cliConfig.aiRulesPath, "docs/");
+    zet.setAiRulesPath(null);
+  });
+
+  it("setIdeSpecsPath stores the path", () => {
+    zet.setIdeSpecsPath(".types/");
+    assert.equal(cliConfig.ideSpecsPath, ".types/");
+    zet.setIdeSpecsPath(null);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Uncalled template detection
+// ---------------------------------------------------------------------------
+
+describe("uncalled template detection", () => {
+  it("throws when an uncalled template is passed to flattenParts", () => {
+    const docker = zet.template((service) => ["docker", "exec", service]);
+    assert.throws(
+      () => flattenParts([docker]),
+      /template was passed to \.command\(\) without being called/
+    );
+  });
+
+  it("does not throw when a called template is passed", () => {
+    const docker = zet.template((service) => ["docker", "exec", service]);
+    const result = flattenParts([docker("app")]);
+    assert.deepEqual(result, ["docker", "exec", "app"]);
   });
 });

@@ -72,6 +72,22 @@ bin/zet.mjs  →  spawns child process  →  lib/runner.mjs  →  imports user's
 - **`test/zet.test.mjs`** — Unit tests. Imports internals directly from `lib/index.mjs`. Tests `parseSignature`, `parseArgv`, `Group`, templates, `CommandOutput`, help formatting.
 - **`test/integration.test.mjs`** — Spawns actual `bin/zet.mjs` against temp directories with generated `zet.config.mjs` files. Uses `writeConfig()` (replaces `'zet-cli'` with direct lib path) and `writeRealConfig()` (uses bare specifier to test loader hook). All integration tests set `NO_COLOR=1`.
 
+## Built-in CLI Commands
+
+Handled separately from user-registered commands:
+
+- **`zet init`** — Handled in `bin/zet.mjs` before config search. Writes `zet.config.mjs` with a hello template. Checks CWD only (no parent traversal).
+- **`zet cli <subcommand>`** — Handled in `init()` inside `lib/index.mjs`, which delegates to `lib/cli.mjs`. Intercepted before group/root command lookup. Config is loaded at this point, so `setAiRulesPath()`/`setIdeSpecsPath()` paths are available.
+  - `zet cli ai-rules` — Writes `zet-cli.md` (AI agent reference)
+  - `zet cli ide-specs` — Generates TypeScript `.d.ts` declarations
+  - `zet cli --help` — Shows cli subcommands
+
+**Important:** When `lib/index.mjs` API changes, the `zet cli ide-specs` output and `zet cli ai-rules` content must be updated in `lib/cli.mjs`.
+
+`zet --help` does NOT show `cli` or `init`. Only `zet cli --help` shows cli subcommands.
+
+**Reserved names:** Never use `init` or `cli` as group prefixes or ungrouped command names — they are reserved for built-in commands and will shadow or conflict with them.
+
 ## Conventions
 
 - Zero dependencies. Node built-ins only.

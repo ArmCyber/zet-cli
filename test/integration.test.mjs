@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -471,5 +471,217 @@ export default zet;
     const result = await run(dir, ["capture"]);
     assert.equal(result.code, 0);
     assert.equal(result.stdout, "GOT:captured");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// zet init
+// ---------------------------------------------------------------------------
+
+describe("zet init", () => {
+  it("creates zet.config.mjs in empty directory", async () => {
+    const dir = tmpDir();
+    const result = await run(dir, ["init"]);
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /Created zet\.config\.mjs/);
+    assert.ok(existsSync(join(dir, "zet.config.mjs")));
+    const content = readFileSync(join(dir, "zet.config.mjs"), "utf8");
+    assert.match(content, /import zet from 'zet-cli'/);
+    assert.match(content, /export default zet/);
+  });
+
+  it("errors when zet.config.mjs already exists", async () => {
+    const dir = tmpDir();
+    writeFileSync(join(dir, "zet.config.mjs"), "// existing");
+    const result = await run(dir, ["init"]);
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /already initialized/);
+  });
+
+  it("does not traverse to parent directory", async () => {
+    const dir = tmpDir();
+    writeFileSync(join(dir, "zet.config.mjs"), "// parent config");
+    const sub = join(dir, "child");
+    mkdirSync(sub);
+    const result = await run(sub, ["init"]);
+    assert.equal(result.code, 0);
+    assert.ok(existsSync(join(sub, "zet.config.mjs")));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// zet cli
+// ---------------------------------------------------------------------------
+
+describe("zet cli", () => {
+  it("zet cli --help shows cli subcommands", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "--help"]);
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /ai-rules/);
+    assert.match(result.stdout, /ide-specs/);
+    assert.match(result.stdout, /Usage: zet cli <command>/);
+  });
+
+  it("zet cli with no args shows help", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli"]);
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /ai-rules/);
+    assert.match(result.stdout, /ide-specs/);
+  });
+
+  it("zet cli ai-rules creates zet-cli.md in project root (default)", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "ai-rules"]);
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /Created/);
+    const content = readFileSync(join(dir, "zet-cli.md"), "utf8");
+    assert.match(content, /AI agent reference/);
+    assert.match(content, /zet\.register/);
+  });
+
+  it("zet cli ai-rules creates zet-cli.md in configured directory path", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.setAiRulesPath('docs/');
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "ai-rules"]);
+    assert.equal(result.code, 0);
+    assert.ok(existsSync(join(dir, "docs", "zet-cli.md")));
+  });
+
+  it("zet cli ai-rules writes to exact file when path ends with .md", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.setAiRulesPath('.ai/skills/zet-cli/SKILL.md');
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "ai-rules"]);
+    assert.equal(result.code, 0);
+    const content = readFileSync(join(dir, ".ai", "skills", "zet-cli", "SKILL.md"), "utf8");
+    assert.match(content, /AI agent reference/);
+  });
+
+  it("zet cli ai-rules writes to exact file when path ends with .mdc", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.setAiRulesPath('.cursor/rules/zet.mdc');
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "ai-rules"]);
+    assert.equal(result.code, 0);
+    assert.ok(existsSync(join(dir, ".cursor", "rules", "zet.mdc")));
+  });
+
+  it("zet cli ide-specs creates .d.ts in .zet-cli/ (default)", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "ide-specs"]);
+    assert.equal(result.code, 0);
+    assert.match(result.stdout, /Created TypeScript declarations/);
+    const dts = readFileSync(join(dir, ".zet-cli", "index.d.ts"), "utf8");
+    assert.match(dts, /declare module "zet-cli"/);
+    const gitignore = readFileSync(join(dir, ".zet-cli", ".gitignore"), "utf8");
+    assert.match(gitignore, /\*/);
+  });
+
+  it("zet cli ide-specs creates .d.ts in configured path", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.setIdeSpecsPath('.types/');
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "ide-specs"]);
+    assert.equal(result.code, 0);
+    const dts = readFileSync(join(dir, ".types", ".zet-cli", "index.d.ts"), "utf8");
+    assert.match(dts, /declare module "zet-cli"/);
+    // Custom path should NOT have .gitignore
+    assert.ok(!existsSync(join(dir, ".types", ".zet-cli", ".gitignore")));
+  });
+
+  it("zet --help does NOT show cli commands or init", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.register('hello').description('Say hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["--help"]);
+    assert.equal(result.code, 0);
+    assert.doesNotMatch(result.stdout, /\bcli\b/);
+    assert.doesNotMatch(result.stdout, /\binit\b/);
+    assert.doesNotMatch(result.stdout, /ai-rules/);
+    assert.doesNotMatch(result.stdout, /ide-specs/);
+  });
+
+  it("zet cli unknown-command errors", async () => {
+    const dir = tmpDir();
+    writeConfig(
+      dir,
+      `
+import zet from 'zet-cli';
+zet.register('hello').command('echo', 'hi');
+export default zet;
+`
+    );
+    const result = await run(dir, ["cli", "nonexistent"]);
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /unknown cli command/);
   });
 });
