@@ -63,9 +63,18 @@ if (!configPath) {
 // Register a module resolution hook so configs can `import zet from 'zet-cli'`
 const pkgRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const [major, minor] = process.versions.node.split(".").map(Number);
+
+if (major < 18 || (major === 18 && minor < 19)) {
+  const y = !process.env.NO_COLOR && process.stderr.isTTY ? "\x1b[1;33m" : "";
+  const r = y ? "\x1b[0m" : "";
+  process.stderr.write(
+    `${y}zet: Node.js ${process.versions.node} is not supported and may cause unexpected behavior. Upgrade to Node.js 18.19 or later.${r}\n`
+  );
+}
+
 const nodeArgs = [];
 
-if (major > 20 || (major === 20 && minor >= 6)) {
+if (major > 20 || (major === 20 && minor >= 6) || (major === 18 && minor >= 19)) {
   nodeArgs.push(
     "--import",
     pathToFileURL(join(pkgRoot, "lib", "register.mjs")).href

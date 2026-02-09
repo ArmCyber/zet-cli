@@ -4,7 +4,7 @@ Technical reference for AI agents working on this codebase.
 
 ## Project
 
-zet-cli — a zero-dependency ESM CLI framework for Node.js (>=18). Users install globally, create `zet.config.mjs`, define commands via fluent API, run with `zet <command>`.
+zet-cli — a zero-dependency ESM CLI framework for Node.js (>=18.19). Users install globally, create `zet.config.mjs`, define commands via fluent API, run with `zet <command>`.
 
 ## Commands
 
@@ -25,7 +25,7 @@ No build step, no linter. Pure ESM (`.mjs` only, no `.js`).
 bin/zet.mjs  →  spawns child process  →  lib/runner.mjs  →  imports user's zet.config.mjs  →  calls zet.init()
 ```
 
-1. **`bin/zet.mjs`** — CLI entry point. Walks up from CWD to find `zet.config.mjs`. Detects Node version to pick ESM loader strategy (`--import` + `register.mjs` for Node >=20.6, `--loader` + `loader.mjs` for older). Spawns `runner.mjs` as child process with `ZET_ROOT_DIR` env var set to config's parent directory. CWD stays as user's CWD.
+1. **`bin/zet.mjs`** — CLI entry point. Walks up from CWD to find `zet.config.mjs`. Detects Node version to pick ESM loader strategy (`--import` + `register.mjs` for Node >=18.19 and >=20.6, `--loader` + `loader.mjs` for older). Warns on unsupported versions below 18.19. Spawns `runner.mjs` as child process with `ZET_ROOT_DIR` env var set to config's parent directory. CWD stays as user's CWD.
 
 2. **`lib/loader.mjs`** — ESM resolve hook. Maps bare specifier `'zet-cli'` to `./index.mjs` so user configs can `import zet from 'zet-cli'` even when the package is globally installed.
 

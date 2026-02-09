@@ -11,7 +11,7 @@
   },
   "main": "./lib/index.mjs",
   "engines": {
-    "node": ">=18"
+    "node": ">=18.19"
   },
   "files": [
     "bin",

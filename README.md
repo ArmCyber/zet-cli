@@ -10,7 +10,7 @@ Define commands with a fluent API in a config file, run them with `zet <command>
 npm install -g zet-cli
 ```
 
-Requires Node.js >= 18.
+Requires Node.js >= 18.19.
 
 ## Getting Started
 
