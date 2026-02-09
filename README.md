@@ -294,7 +294,10 @@ zet.info('Success');     // green, stdout
 zet.error('Failed');     // red, stderr
 zet.warning('Careful');  // yellow, stderr
 zet.line('Plain text');  // no color, stdout
+zet.styledLine('<i>Deployed</i> to <b>production</b>');  // styled, stdout
 ```
+
+`styledLine` supports tags: `<b>` bold, `<i>` info/green, `<w>` warning/yellow, `<e>` error/red. Combine a color with bold: `<ib>` green+bold, `<wb>` yellow+bold, `<eb>` red+bold. Closing tag must match the opening tag exactly (`<eb>...</eb>`).
 
 Respects `NO_COLOR` env var and TTY detection.
 
