@@ -1,6 +1,6 @@
 {
   "name": "zet-cli",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "type": "module",
   "description": "A lightweight, zero-dependency CLI framework for Node.js",
   "bin": {

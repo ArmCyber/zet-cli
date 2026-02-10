@@ -88,6 +88,8 @@ Handled separately from user-registered commands:
 
 **Reserved names:** Never use `init` or `cli` as group prefixes or ungrouped command names — they are reserved for built-in commands and will shadow or conflict with them.
 
+**Name conflicts:** A root command and a group cannot share the same name. Registration will throw if a command is registered with an existing group's name or vice versa. Use distinct names or nest the command inside the group.
+
 ## Conventions
 
 - Zero dependencies. Node built-ins only.
