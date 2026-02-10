@@ -306,12 +306,12 @@ Respects `NO_COLOR` env var and TTY detection.
 Configure output paths for `zet cli ai-rules` and `zet cli ide-specs`:
 
 ```js
-zet.setAiRulesPath('docs/');                            // ZETCLI.md → docs/ZETCLI.md
+zet.setAiRulesPath('docs/');                            // zet-cli.md → docs/zet-cli.md
 zet.setAiRulesPath('.claude/skills/zet-crm/SKILL.md');  // custom filename
 zet.setIdeSpecsPath('.types/');                         // .d.ts → .types/.zet-cli/index.d.ts
 ```
 
-`setAiRulesPath` accepts a directory (appends `ZETCLI.md`) or a full filename. Both paths are relative to the project root. Call these in your `zet.config.mjs` before `export default zet`.
+`setAiRulesPath` accepts a directory (appends `zet-cli.md`) or a full filename. Both paths are relative to the project root. Call these in your `zet.config.mjs` before `export default zet`.
 
 ### Auto-generated Help
 
@@ -363,10 +363,10 @@ Bootstrap a new project — creates `zet.config.mjs` in the current directory wi
 
 ### `zet cli ai-rules`
 
-Generate a `ZETCLI.md` file — a condensed AI agent reference for your project's zet commands. By default, writes `ZETCLI.md` to the project root. You can set a custom path — either a directory or a full filename:
+Generate a `zet-cli.md` file — a condensed AI agent reference for your project's zet commands. By default, writes `zet-cli.md` to the project root. You can set a custom path — either a directory or a full filename:
 
 ```js
-zet.setAiRulesPath('docs/');                            // → docs/ZETCLI.md
+zet.setAiRulesPath('docs/');                            // → docs/zet-cli.md
 zet.setAiRulesPath('.claude/skills/zet-crm/SKILL.md');  // → .claude/skills/zet-crm/SKILL.md
 ```
 
