@@ -295,8 +295,20 @@ describe("Group", () => {
     assert.ok(result instanceof CommandBuilder);
   });
 
-  it("zet.group() rejects reserved 'cli' prefix", () => {
-    assert.throws(() => zet.group("cli", "CLI"), /reserved/);
+  it("zet.group() rejects reserved 'publish' prefix", () => {
+    assert.throws(() => zet.group("publish", "Publish"), /reserved/);
+  });
+
+  it("zet.group() rejects reserved 'init' prefix", () => {
+    assert.throws(() => zet.group("init", "Init"), /reserved/);
+  });
+
+  it("zet.register() rejects reserved 'publish' name", () => {
+    assert.throws(() => zet.register("publish"), /reserved/);
+  });
+
+  it("zet.register() rejects reserved 'init' name", () => {
+    assert.throws(() => zet.register("init"), /reserved/);
   });
 });
 
@@ -422,16 +434,16 @@ describe("zet.rest()", () => {
 // ---------------------------------------------------------------------------
 
 describe("cliConfig setters", () => {
-  it("setAiRulesPath stores the path", () => {
-    zet.setAiRulesPath("docs/");
-    assert.equal(cliConfig.aiRulesPath, "docs/");
-    zet.setAiRulesPath(null);
+  it("setAiPublishPath stores the path", () => {
+    zet.setAiPublishPath("docs/");
+    assert.equal(cliConfig.aiPublishPath, "docs/");
+    zet.setAiPublishPath(null);
   });
 
-  it("setIdeSpecsPath stores the path", () => {
-    zet.setIdeSpecsPath(".types/");
-    assert.equal(cliConfig.ideSpecsPath, ".types/");
-    zet.setIdeSpecsPath(null);
+  it("setIdePublishPath stores the path", () => {
+    zet.setIdePublishPath(".types/");
+    assert.equal(cliConfig.idePublishPath, ".types/");
+    zet.setIdePublishPath(null);
   });
 });
 

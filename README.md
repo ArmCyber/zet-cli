@@ -73,7 +73,7 @@ zet be migrate --fresh
 zet be seed
 ```
 
-The prefix `cli` is reserved and will throw an error.
+The names `publish` and `init` are reserved and will throw an error if used as group prefixes or command names.
 
 ### Command Registration
 
@@ -301,17 +301,17 @@ zet.styledLine('<i>Deployed</i> to <b>production</b>');  // styled, stdout
 
 Respects `NO_COLOR` env var and TTY detection.
 
-### `zet.setAiRulesPath()` / `zet.setIdeSpecsPath()`
+### `zet.setAiPublishPath()` / `zet.setIdePublishPath()`
 
-Configure output paths for `zet cli ai-rules` and `zet cli ide-specs`:
+Configure output paths for `zet publish ai` and `zet publish ide`:
 
 ```js
-zet.setAiRulesPath('docs/');                            // zet-cli.md → docs/zet-cli.md
-zet.setAiRulesPath('.claude/skills/zet-crm/SKILL.md');  // custom filename
-zet.setIdeSpecsPath('.types/');                         // .d.ts → .types/.zet-cli/index.d.ts
+zet.setAiPublishPath('docs/');                            // zet-cli.md → docs/zet-cli.md
+zet.setAiPublishPath('.claude/skills/zet-crm/SKILL.md');  // custom filename
+zet.setIdePublishPath('.types/');                         // .d.ts → .types/.zet-cli/index.d.ts
 ```
 
-`setAiRulesPath` accepts a directory (appends `zet-cli.md`) or a full filename. Both paths are relative to the project root. Call these in your `zet.config.mjs` before `export default zet`.
+`setAiPublishPath` accepts a directory (appends `zet-cli.md`) or a full filename. Both paths are relative to the project root. Call these in your `zet.config.mjs` before `export default zet`.
 
 ### Auto-generated Help
 
@@ -361,28 +361,28 @@ export default zet;
 
 Bootstrap a new project — creates `zet.config.mjs` in the current directory with a sample command. Only checks the current directory (no parent traversal).
 
-### `zet cli ai-rules`
+### `zet publish ai`
 
 Generate a `zet-cli.md` file — a condensed AI agent reference for your project's zet commands. By default, writes `zet-cli.md` to the project root. You can set a custom path — either a directory or a full filename:
 
 ```js
-zet.setAiRulesPath('docs/');                            // → docs/zet-cli.md
-zet.setAiRulesPath('.claude/skills/zet-crm/SKILL.md');  // → .claude/skills/zet-crm/SKILL.md
+zet.setAiPublishPath('docs/');                            // → docs/zet-cli.md
+zet.setAiPublishPath('.claude/skills/zet-crm/SKILL.md');  // → .claude/skills/zet-crm/SKILL.md
 ```
 
-### `zet cli ide-specs`
+### `zet publish ide`
 
 Generate TypeScript declarations (`.d.ts`) for IDE autocompletion. By default, writes to `.zet-cli/` in the project root (with a `.gitignore` so generated files stay out of version control).
 
 ```js
-zet.setIdeSpecsPath('.types/');  // .d.ts goes to .types/.zet-cli/index.d.ts
+zet.setIdePublishPath('.types/');  // .d.ts goes to .types/.zet-cli/index.d.ts
 ```
 
-### `zet cli --help`
+### `zet publish --help`
 
-Show available cli subcommands.
+Show available publish subcommands.
 
-> Note: `zet --help` does not show `cli` or `init` — these are internal tooling commands.
+> Note: `zet --help` does not show `publish` or `init` — these are internal tooling commands.
 
 ## How It Works
 

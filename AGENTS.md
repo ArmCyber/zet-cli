@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Technical reference for AI agents working on this codebase.
+Technical reference for AI agents working on this codebase. See [README.md](./README.md) for user-facing API reference, signature syntax, and usage examples.
 
 ## Project
 
@@ -9,7 +9,7 @@ zet-cli — a zero-dependency ESM CLI framework for Node.js (>=18.19). Users ins
 ## Commands
 
 ```sh
-npm test                                    # run all tests (72 tests)
+npm test                                    # run all tests (92 tests)
 node --test test/zet.test.mjs               # unit tests only
 node --test test/integration.test.mjs       # integration tests only
 node --test --test-name-pattern="pattern"   # run tests matching pattern
@@ -44,8 +44,9 @@ bin/zet.mjs  →  spawns child process  →  lib/runner.mjs  →  imports user's
 - **`flattenParts(parts)`** — Recursively flattens command parts: expands `TemplateResult`, `RestPlaceholder`, and arrays into a flat string array for spawning.
 - **`CommandOutput`** — Has `code`, `output` (combined), `stdout`, `stderr`, `success` (getter), `failed` (getter), `throw()`.
 - **`CommandBuilder`** — Fluent builder with `.description()`, `.command(...parts)`, `.callback(fn)`. Returned by `group.register()` / `zet.register()`.
-- **`Group`** — Named command groups with a prefix. `rootGroup` is the unnamed default. `'cli'` prefix is reserved.
+- **`Group`** — Named command groups with a prefix. `rootGroup` is the unnamed default.
 - **`TemplateResult`** / **`RestPlaceholder`** — Sentinel wrappers for `flattenParts` to recognize and expand.
+- **`RESERVED_NAMES`** — `new Set(["publish", "init"])`. Blocked in both `zet.group()` and `zet.register()`.
 - **Error handling** — `process.on('uncaughtException')` and `process.on('unhandledRejection')` format errors with red message + dimmed user-only stack frames (filters out `PKG_ROOT_URL` and `node:` frames).
 - **Color** — `outAnsi()` (stdout) and `errAnsi()` (stderr) check TTY per-stream. Respects `NO_COLOR` env var.
 
@@ -65,30 +66,33 @@ bin/zet.mjs  →  spawns child process  →  lib/runner.mjs  →  imports user's
 | `zet.command(...parts)` | Spawn with inherited stdio |
 | `zet.silentCommand(...parts)` | Spawn with piped stdio |
 | `zet.info/error/warning/line(msg)` | Colored output helpers |
+| `zet.styledLine(msg)` | Styled output with tags: `<b>` bold, `<i>` info/green, `<w>` warning/yellow, `<e>` error/red |
+| `zet.setAiPublishPath(path)` | Set output path for `zet publish ai` |
+| `zet.setIdePublishPath(path)` | Set output path for `zet publish ide` |
 | `zet.exit(code)` | Exit process |
-
-## Tests
-
-- **`test/zet.test.mjs`** — Unit tests. Imports internals directly from `lib/index.mjs`. Tests `parseSignature`, `parseArgv`, `Group`, templates, `CommandOutput`, help formatting.
-- **`test/integration.test.mjs`** — Spawns actual `bin/zet.mjs` against temp directories with generated `zet.config.mjs` files. Uses `writeConfig()` (replaces `'zet-cli'` with direct lib path) and `writeRealConfig()` (uses bare specifier to test loader hook). All integration tests set `NO_COLOR=1`.
 
 ## Built-in CLI Commands
 
 Handled separately from user-registered commands:
 
 - **`zet init`** — Handled in `bin/zet.mjs` before config search. Writes `zet.config.mjs` with a hello template. Checks CWD only (no parent traversal).
-- **`zet cli <subcommand>`** — Handled in `init()` inside `lib/index.mjs`, which delegates to `lib/cli.mjs`. Intercepted before group/root command lookup. Config is loaded at this point, so `setAiRulesPath()`/`setIdeSpecsPath()` paths are available.
-  - `zet cli ai-rules` — Writes `zet-cli.md` (AI agent reference)
-  - `zet cli ide-specs` — Generates TypeScript `.d.ts` declarations
-  - `zet cli --help` — Shows cli subcommands
+- **`zet publish <subcommand>`** — Handled in `init()` inside `lib/index.mjs`, which delegates to `lib/cli.mjs`. Intercepted before group/root command lookup. Config is loaded at this point, so `setAiPublishPath()`/`setIdePublishPath()` paths are available.
+  - `zet publish ai` — Writes `zet-cli.md` (AI agent reference)
+  - `zet publish ide` — Generates TypeScript `.d.ts` declarations
+  - `zet publish --help` — Shows publish subcommands
 
-**Important:** When `lib/index.mjs` API changes, the `zet cli ide-specs` output and `zet cli ai-rules` content must be updated in `lib/cli.mjs`.
+**Important:** When `lib/index.mjs` API changes, the `zet publish ide` output and `zet publish ai` content must be updated in `lib/cli.mjs`.
 
-`zet --help` does NOT show `cli` or `init`. Only `zet cli --help` shows cli subcommands.
+`zet --help` does NOT show `publish` or `init`. Only `zet publish --help` shows publish subcommands.
 
-**Reserved names:** Never use `init` or `cli` as group prefixes or ungrouped command names — they are reserved for built-in commands and will shadow or conflict with them.
+**Reserved names:** Never use `init` or `publish` as group prefixes or ungrouped command names — they are reserved for built-in commands. Both `zet.group()` and `zet.register()` will throw if given a reserved name.
 
 **Name conflicts:** A root command and a group cannot share the same name. Registration will throw if a command is registered with an existing group's name or vice versa. Use distinct names or nest the command inside the group.
+
+## Tests
+
+- **`test/zet.test.mjs`** — Unit tests. Imports internals directly from `lib/index.mjs`. Tests `parseSignature`, `parseArgv`, `Group`, templates, `CommandOutput`, help formatting.
+- **`test/integration.test.mjs`** — Spawns actual `bin/zet.mjs` against temp directories with generated `zet.config.mjs` files. Uses `writeConfig()` (replaces `'zet-cli'` with direct lib path) and `writeRealConfig()` (uses bare specifier to test loader hook). All integration tests set `NO_COLOR=1`.
 
 ## Conventions
 

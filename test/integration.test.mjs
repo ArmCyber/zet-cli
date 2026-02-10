@@ -264,13 +264,13 @@ export default zet;
     assert.equal(result.code, 42);
   });
 
-  it("rejects reserved 'cli' group prefix", async () => {
+  it("rejects reserved 'publish' group prefix", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
       `
 import zet from 'zet-cli';
-zet.group('cli', 'CLI');
+zet.group('publish', 'Publish');
 export default zet;
 `
     );
@@ -510,11 +510,11 @@ describe("zet init", () => {
 });
 
 // ---------------------------------------------------------------------------
-// zet cli
+// zet publish
 // ---------------------------------------------------------------------------
 
-describe("zet cli", () => {
-  it("zet cli --help shows cli subcommands", async () => {
+describe("zet publish", () => {
+  it("zet publish --help shows publish subcommands", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
@@ -524,14 +524,14 @@ zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "--help"]);
+    const result = await run(dir, ["publish", "--help"]);
     assert.equal(result.code, 0);
-    assert.match(result.stdout, /ai-rules/);
-    assert.match(result.stdout, /ide-specs/);
-    assert.match(result.stdout, /Usage: zet cli <command>/);
+    assert.match(result.stdout, /\bai\b/);
+    assert.match(result.stdout, /\bide\b/);
+    assert.match(result.stdout, /Usage: zet publish <command>/);
   });
 
-  it("zet cli with no args shows help", async () => {
+  it("zet publish with no args shows help", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
@@ -541,13 +541,13 @@ zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli"]);
+    const result = await run(dir, ["publish"]);
     assert.equal(result.code, 0);
-    assert.match(result.stdout, /ai-rules/);
-    assert.match(result.stdout, /ide-specs/);
+    assert.match(result.stdout, /\bai\b/);
+    assert.match(result.stdout, /\bide\b/);
   });
 
-  it("zet cli ai-rules creates zet-cli.md in project root (default)", async () => {
+  it("zet publish ai creates zet-cli.md in project root (default)", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
@@ -557,7 +557,7 @@ zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "ai-rules"]);
+    const result = await run(dir, ["publish", "ai"]);
     assert.equal(result.code, 0);
     assert.match(result.stdout, /Created/);
     const content = readFileSync(join(dir, "zet-cli.md"), "utf8");
@@ -565,56 +565,56 @@ export default zet;
     assert.match(content, /zet\.register/);
   });
 
-  it("zet cli ai-rules creates zet-cli.md in configured directory path", async () => {
+  it("zet publish ai creates zet-cli.md in configured directory path", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
       `
 import zet from 'zet-cli';
-zet.setAiRulesPath('docs/');
+zet.setAiPublishPath('docs/');
 zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "ai-rules"]);
+    const result = await run(dir, ["publish", "ai"]);
     assert.equal(result.code, 0);
     assert.ok(existsSync(join(dir, "docs", "zet-cli.md")));
   });
 
-  it("zet cli ai-rules writes to exact file when path ends with .md", async () => {
+  it("zet publish ai writes to exact file when path ends with .md", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
       `
 import zet from 'zet-cli';
-zet.setAiRulesPath('.ai/skills/zet-cli/SKILL.md');
+zet.setAiPublishPath('.ai/skills/zet-cli/SKILL.md');
 zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "ai-rules"]);
+    const result = await run(dir, ["publish", "ai"]);
     assert.equal(result.code, 0);
     const content = readFileSync(join(dir, ".ai", "skills", "zet-cli", "SKILL.md"), "utf8");
     assert.match(content, /AI agent reference/);
   });
 
-  it("zet cli ai-rules writes to exact file when path ends with .mdc", async () => {
+  it("zet publish ai writes to exact file when path ends with .mdc", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
       `
 import zet from 'zet-cli';
-zet.setAiRulesPath('.cursor/rules/zet.mdc');
+zet.setAiPublishPath('.cursor/rules/zet.mdc');
 zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "ai-rules"]);
+    const result = await run(dir, ["publish", "ai"]);
     assert.equal(result.code, 0);
     assert.ok(existsSync(join(dir, ".cursor", "rules", "zet.mdc")));
   });
 
-  it("zet cli ide-specs creates .d.ts in .zet-cli/ (default)", async () => {
+  it("zet publish ide creates .d.ts in .zet-cli/ (default)", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
@@ -624,7 +624,7 @@ zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "ide-specs"]);
+    const result = await run(dir, ["publish", "ide"]);
     assert.equal(result.code, 0);
     assert.match(result.stdout, /Created TypeScript declarations/);
     const dts = readFileSync(join(dir, ".zet-cli", "index.d.ts"), "utf8");
@@ -633,18 +633,18 @@ export default zet;
     assert.match(gitignore, /\*/);
   });
 
-  it("zet cli ide-specs creates .d.ts in configured path", async () => {
+  it("zet publish ide creates .d.ts in configured path", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
       `
 import zet from 'zet-cli';
-zet.setIdeSpecsPath('.types/');
+zet.setIdePublishPath('.types/');
 zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "ide-specs"]);
+    const result = await run(dir, ["publish", "ide"]);
     assert.equal(result.code, 0);
     const dts = readFileSync(join(dir, ".types", ".zet-cli", "index.d.ts"), "utf8");
     assert.match(dts, /declare module "zet-cli"/);
@@ -652,7 +652,7 @@ export default zet;
     assert.ok(!existsSync(join(dir, ".types", ".zet-cli", ".gitignore")));
   });
 
-  it("zet --help does NOT show cli commands or init", async () => {
+  it("zet --help does NOT show publish commands or init", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
@@ -664,13 +664,11 @@ export default zet;
     );
     const result = await run(dir, ["--help"]);
     assert.equal(result.code, 0);
-    assert.doesNotMatch(result.stdout, /\bcli\b/);
+    assert.doesNotMatch(result.stdout, /\bpublish\b/);
     assert.doesNotMatch(result.stdout, /\binit\b/);
-    assert.doesNotMatch(result.stdout, /ai-rules/);
-    assert.doesNotMatch(result.stdout, /ide-specs/);
   });
 
-  it("zet cli unknown-command errors", async () => {
+  it("zet publish unknown-command errors", async () => {
     const dir = tmpDir();
     writeConfig(
       dir,
@@ -680,8 +678,8 @@ zet.register('hello').command('echo', 'hi');
 export default zet;
 `
     );
-    const result = await run(dir, ["cli", "nonexistent"]);
+    const result = await run(dir, ["publish", "nonexistent"]);
     assert.equal(result.code, 1);
-    assert.match(result.stderr, /unknown cli command/);
+    assert.match(result.stderr, /unknown publish command/);
   });
 });
